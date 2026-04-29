@@ -1,6 +1,7 @@
 import streamlit as st
 from apify_client import ApifyClient
 import openai
+import json
 
 # 1. Initialize
 client = ApifyClient(st.secrets["APIFY_API_TOKEN"])
@@ -36,7 +37,23 @@ if st.button("Generate Pro Report", type="primary"):
             
             st.write("🤖 AI Analysis in progress...")
             # We wrap the AI call to ensure it looks clean
-            prompt = f"Analyze this IG data and return 3 metrics (Engage %, Trust Score 1-10, Value $) followed by a summary: {data}"
+            prompt = f"""Act as a Senior Influencer Strategist & Competitor Analyst.
+Analyze the following Instagram data:
+Data: {json.dumps(data[:3], indent=2)}
+
+Provide a "Competitor Intelligence Report" with these specific sections:
+
+1. **The 'Hook' Strategy**: Analyze the top 5 captions. What is the recurring emotional hook (e.g., Fear of Missing Out, Educational, Aesthetic/Vibe)?
+2. **Content Gap Opportunity**: What is this influencer NOT doing that a competitor could exploit? (e.g., "Lack of video tutorials," "No community Q&A").
+3. **Engagement Quality Audit**:
+   - Real vs. Bot feel of comments.
+   - Saves/Shares potential (Does the content provide 'utility'?).
+4. **Sponsorship Profile**:
+   - Estimated Post Value based on followers and engagement.
+   - Brand Fit: Which 3 industries would this influencer convert best for?
+5. **Growth Velocity Prediction**: Based on recent activity, is this profile likely to 'Trend' or 'Stagnate' in the next 30 days?
+
+Format the output using professional Markdown headers and bullet points. Use bolding for key metrics."""
             response = openai.chat.completions.create(
                 model="gpt-4o",
                 messages=[{"role": "user", "content": prompt}]
